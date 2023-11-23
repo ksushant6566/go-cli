@@ -9,6 +9,7 @@ type UserData struct {
 	userName string
 	email string
 	numberOfTickets uint
+	confirmationSent bool
 }
 
 var bookings = make([]UserData, 0)
@@ -56,13 +57,24 @@ func bookTickets(username, email string, numberOfTickets uint) uint {
 		printBookingSummary()
 	}
 
+	sendTicketConfirmation(userData)
+
 	return remainingTickets
+}
+
+func sendTicketConfirmation(booking *UserData) {
+	msg:= fmt.Sprintf("Hi %v, \n Your %v tickets have been booked successfully!", booking.userName, booking.numberOfTickets)
+	fmt.Println("####################")
+	fmt.Println(msg)
+	fmt.Println("####################")
+
+	booking.confirmationSent = true
 }
 
 func printBookingSummary() {
 	fmt.Println("Booking summary")
 	for _, booking := range bookings {
-		fmt.Printf("\nusername: %v, email: %v, tickets: %v.", booking.userName, booking.email, booking.numberOfTickets)
+		fmt.Printf("\nusername: %v, email: %v, tickets: %v, confirmationSent %v.", booking.userName, booking.email, booking.numberOfTickets, booking.confirmationSent)
 	}
 	fmt.Println("")
 	fmt.Println("Booking summary end")
