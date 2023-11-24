@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"go-cli/helper"
+	"sync"
+	"time"
 )
 
 type UserData struct {
@@ -12,10 +14,14 @@ type UserData struct {
 	confirmationSent bool
 }
 
+var wg = sync.WaitGroup{}
+
 var bookings = make([]UserData, 0)
 const conferenceName = "Golang Conference"
 const conferenceTickets uint = 50
 var remainingTickets = conferenceTickets
+
+
 
 func main () {
   
@@ -23,19 +29,15 @@ func main () {
 	fmt.Printf("We currently have %v tickets remaining!\n", remainingTickets)
 	fmt.Println("Get your tickets here to attend the conference!")
 
-	for remainingTickets > 0 {
-		
+	// for remainingTickets > 0 {
 		username, email, ticketQuantity := helper.GetUserInput()
 		isUserInputValid := helper.ValidateUserInput(username, email, ticketQuantity, remainingTickets)
 
 		if(isUserInputValid) {
 			remainingTickets = bookTickets(username, email, ticketQuantity)
-		} else {
-			continue
 		}
-
-	}
-
+	// }
+	wg.Wait()
 }
 
 func bookTickets(username, email string, numberOfTickets uint) uint {
@@ -56,19 +58,22 @@ func bookTickets(username, email string, numberOfTickets uint) uint {
 	} else {
 		printBookingSummary()
 	}
-
-	sendTicketConfirmation(userData)
+	wg.Add(1)
+	go sendTicketConfirmation(userData)
 
 	return remainingTickets
 }
 
 func sendTicketConfirmation(booking *UserData) {
 	msg:= fmt.Sprintf("Hi %v, \n Your %v tickets have been booked successfully!", booking.userName, booking.numberOfTickets)
+
+	time.Sleep(time.Second * 10)
 	fmt.Println("####################")
 	fmt.Println(msg)
 	fmt.Println("####################")
 
 	booking.confirmationSent = true
+	wg.Done()
 }
 
 func printBookingSummary() {
